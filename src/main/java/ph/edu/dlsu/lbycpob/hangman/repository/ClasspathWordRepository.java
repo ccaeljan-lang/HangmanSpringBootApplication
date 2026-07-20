@@ -23,4 +23,26 @@ public final class ClasspathWordRepository implements WordRepository {
                 ? resourceBasePath.substring(0, resourceBasePath.length() - 1)
                 : resourceBasePath;
     }
+
+    @Override
+    public String getRandomWord(String filename) throws IOException {
+        Objects.requireNonNull(filename, "filename must not be null");
+        if (filename.isBlank()) {
+            throw new IllegalArgumentException("filename must not be blank");
+        }
+
+        String resourcePath = resourceBasePath + "/" + filename;
+        List<String> rawLines = ClasspathResources.readLines(resourcePath);
+        List<String> words = new ArrayList<>();
+        for (String line : rawLines) {
+            line = line.trim();
+            if (!line.isEmpty()) {
+                words.add(line.toUpperCase());
+            }
+        }
+        if (words.isEmpty()) {
+            throw new IOException("Word list resource contains no words: " + resourcePath);
+        }
+        return words.get(random.nextInt(words.size()));
+    }
 }
