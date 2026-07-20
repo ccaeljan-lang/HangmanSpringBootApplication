@@ -30,4 +30,42 @@ public class GameController {
     public String index() {
         return "index";
     }
+
+    //  START A NEW SESSION
+    @PostMapping("/game/start")
+    public String startGame(@RequestParam("filename") String filename,
+                            HttpSession session) {
+        GameState state = new GameState();
+        state.setFilename(filename.trim());
+
+        String word = hangmanService.getRandomWord(state.getFilename());
+        state.setSecretWord(word);
+        state.setGuessesRemaining(HangmanService.MAX_GUESSES);
+        state.setMessage("A new word has been chosen. It has "
+                + word.length() + " letter(s). Good luck!");
+
+        session.setAttribute(SESSION_KEY, state);
+        return "redirect:/game/play";
+    }
+
+    //  DISPLAY CURRENT GAME STATE
+    @GetMapping("/game/play")
+    public String play(HttpSession session, Model model) {
+        GameState state = (GameState) session.getAttribute(SESSION_KEY);
+        if (state == null) {
+            // Session expired or player navigated here directly – send them home.
+            return "redirect:/";
+        }
+
+        String hint        = hangmanService.createHint(state.getSecretWord(), state.getGuessedLetters());
+        String displayHint = hangmanService.formatHintForDisplay(hint);
+        String art         = hangmanService.getHangmanArtAsString(state.getGuessesRemaining());
+
+        model.addAttribute("state",       state);
+        model.addAttribute("hint",        hint);
+        model.addAttribute("displayHint", displayHint);
+        model.addAttribute("hangmanArt",  art);
+        model.addAttribute("alphabet",    hangmanService.getAlphabet());
+        return "play";
+    }
 }
