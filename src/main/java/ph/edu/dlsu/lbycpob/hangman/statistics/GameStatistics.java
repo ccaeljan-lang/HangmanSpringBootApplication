@@ -1,4 +1,4 @@
-ppackage ph.edu.dlsu.lbycpob.hangman.statistics;
+package ph.edu.dlsu.lbycpob.hangman.statistics;
 
 import java.util.Locale;
 
